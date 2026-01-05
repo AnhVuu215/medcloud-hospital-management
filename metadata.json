@@ -1,0 +1,7 @@
+{
+  "name": "MedCloud - Hệ Thống Quản Lý Bệnh Viện Thông Minh",
+  "description": "Một giải pháp quản lý bệnh viện toàn diện bao gồm đặt lịch, bệnh án điện tử, quản lý doanh thu và bảo mật dữ liệu y tế, được thiết kế cho đồ án tốt nghiệp CNTT.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

@@ -1,8 +1,13 @@
 
 
 import React, { useState, useMemo, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { MOCK_APPOINTMENTS as INITIAL_APPOINTMENTS, SPECIALIZATIONS } from '../constants';
 import { UserRole, Appointment, User } from '../types';
+import { ConfirmDialog, PromptDialog } from '../components/ConfirmDialog';
+import { SkeletonTable, SkeletonMobileCard } from '../components/SkeletonTable';
+import { isValidAppointmentStatus } from '../utils/typeGuards';
+import EmptyState from '../components/EmptyState';
 import {
   Calendar,
   Search,
@@ -51,7 +56,20 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
   const [specFilter, setSpecFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [sortConfig, setSortConfig] = useState<SortConfig | null>({ key: 'date', direction: 'desc' });
-  const [notification, setNotification] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // States for dialogs
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => { } });
+
+  const [promptDialog, setPromptDialog] = useState<{
+    isOpen: boolean;
+    appointmentId: string | null;
+  }>({ isOpen: false, appointmentId: null });
 
   // States cho thăm khám
   const [isExamModalOpen, setIsExamModalOpen] = useState(false);
@@ -96,48 +114,64 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
 
   const handleUpdateStatus = async (appointmentId: string, newStatus: string) => {
     try {
+      // Validate status
+      if (!isValidAppointmentStatus(newStatus)) {
+        toast.error('Trạng thái không hợp lệ');
+        return;
+      }
+
       await appointmentAPI.updateStatus(appointmentId, newStatus);
       // Update local state
       setAppointments(prev => prev.map(apt =>
         apt.id === appointmentId ? { ...apt, status: newStatus } : apt
       ));
-      setNotification(`Đã cập nhật trạng thái thành ${newStatus}`);
-      setTimeout(() => setNotification(null), 3000);
+      toast.success(`Đã cập nhật trạng thái thành ${newStatus}`);
     } catch (error) {
       console.error('Failed to update status:', error);
-      alert('Không thể cập nhật trạng thái');
+      toast.error('Không thể cập nhật trạng thái');
     }
   };
 
   const handleCancel = async (appointmentId: string) => {
-    const reason = prompt('Lý do hủy lịch hẹn:');
-    if (!reason) return;
+    setPromptDialog({ isOpen: true, appointmentId });
+  };
+
+  const handleCancelConfirm = async (reason: string) => {
+    const appointmentId = promptDialog.appointmentId;
+    if (!appointmentId) return;
 
     try {
       await appointmentAPI.delete(appointmentId, reason);
       setAppointments(prev => prev.map(apt =>
-        apt.id === appointmentId ? { ...apt, status: 'CANCELLED' } : apt
+        apt.id === appointmentId ? { ...apt, status: 'CANCELLED' as Appointment['status'] } : apt
       ));
-      setNotification('Đã hủy lịch hẹn');
-      setTimeout(() => setNotification(null), 3000);
+      toast.success('Đã hủy lịch hẹn');
     } catch (error) {
       console.error('Failed to cancel appointment:', error);
-      alert('Không thể hủy lịch hẹn');
+      toast.error('Không thể hủy lịch hẹn');
+    } finally {
+      setPromptDialog({ isOpen: false, appointmentId: null });
     }
   };
 
   const handleDelete = async (appointmentId: string) => {
-    if (!confirm('Bạn có chắc muốn xóa lịch hẹn này?')) return;
-
-    try {
-      await appointmentAPI.delete(appointmentId);
-      setAppointments(prev => prev.filter(apt => apt.id !== appointmentId));
-      setNotification('Đã xóa lịch hẹn');
-      setTimeout(() => setNotification(null), 3000);
-    } catch (error) {
-      console.error('Failed to delete appointment:', error);
-      alert('Không thể xóa lịch hẹn');
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Xác nhận xóa',
+      message: 'Bạn có chắc muốn xóa lịch hẹn này? Hành động này không thể hoàn tác.',
+      onConfirm: async () => {
+        try {
+          await appointmentAPI.delete(appointmentId);
+          setAppointments(prev => prev.filter(apt => apt.id !== appointmentId));
+          toast.success('Đã xóa lịch hẹn');
+        } catch (error) {
+          console.error('Failed to delete appointment:', error);
+          toast.error('Không thể xóa lịch hẹn');
+        } finally {
+          setConfirmDialog({ isOpen: false, title: '', message: '', onConfirm: () => { } });
+        }
+      }
+    });
   };
 
   return (
@@ -278,13 +312,36 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
       </div>
 
       {filteredAppointments.length === 0 && (
-        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
-          <Calendar size={48} className="mx-auto text-slate-200 mb-4" />
-          <p className="text-slate-400 font-bold italic">Không có lịch hẹn nào được tìm thấy.</p>
-        </div>
+        <EmptyState
+          icon={Calendar}
+          title="Không có lịch hẹn"
+          description="Chưa có lịch hẹn nào được tìm thấy. Hãy tạo lịch hẹn mới để bắt đầu."
+          actionLabel={role !== UserRole.PATIENT ? "Tạo lịch hẹn mới" : undefined}
+          onAction={role !== UserRole.PATIENT ? () => setIsModalOpen(true) : undefined}
+        />
       )}
 
       <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onConfirm={() => { }} />
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog({ isOpen: false, title: '', message: '', onConfirm: () => { } })}
+        variant="danger"
+      />
+
+      {/* Prompt Dialog for Cancellation Reason */}
+      <PromptDialog
+        isOpen={promptDialog.isOpen}
+        title="Hủy lịch hẹn"
+        message="Vui lòng nhập lý do hủy lịch hẹn:"
+        placeholder="Nhập lý do..."
+        onConfirm={handleCancelConfirm}
+        onCancel={() => setPromptDialog({ isOpen: false, appointmentId: null })}
+      />
     </div>
   );
 };

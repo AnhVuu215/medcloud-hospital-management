@@ -102,3 +102,13 @@ export interface Stats {
   popularDiseases: { name: string; count: number }[];
   revenueData: { date: string; amount: number }[];
 }
+
+export interface DashboardStats {
+  totalPatients: number;
+  newPatientsToday: number;
+  appointmentsToday: number;
+  completedToday: number;
+  revenueToday: number;
+  lowStockMedicines: number;
+}
+

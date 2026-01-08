@@ -17,6 +17,7 @@ import medicineRoutes from './routes/medicine.routes.js';
 import medicalRecordRoutes from './routes/medicalRecord.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import reportRoutes from './routes/report.routes.js';
+import profileRoutes from './routes/profile.routes.js';
 
 // Load environment variables
 dotenv.config();
@@ -77,7 +78,8 @@ app.get('/api', (_req: Request, res: Response) => {
             medicines: '/api/medicines',
             payments: '/api/payments',
             schedules: '/api/schedules',
-            notifications: '/api/notifications'
+            notifications: '/api/notifications',
+            profile: '/api/profile'
         }
     });
 });
@@ -90,6 +92,7 @@ app.use('/api/medicines', medicineRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/profile', profileRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

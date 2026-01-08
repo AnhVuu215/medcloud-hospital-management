@@ -7,9 +7,10 @@ import NotificationBell from './NotificationBell';
 interface HeaderProps {
   user: User;
   onLogout: () => void;
+  onNavigateToProfile?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
+const Header: React.FC<HeaderProps> = ({ user, onLogout, onNavigateToProfile }) => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   return (
@@ -65,7 +66,13 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
                   <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{user.role}</p>
                 </div>
-                <button className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                <button
+                  onClick={() => {
+                    onNavigateToProfile?.();
+                    setShowDropdown(false);
+                  }}
+                  className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                >
                   <UserIcon size={16} className="text-slate-400" />
                   <span className="font-medium">Hồ sơ cá nhân</span>
                 </button>

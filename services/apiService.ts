@@ -295,3 +295,36 @@ export const reportAPI = {
         return apiCall<any>(`/reports/revenue${query}`);
     },
 };
+
+// Profile API
+export const profileAPI = {
+    // GET /api/profile
+    getProfile: async () => {
+        return apiCall<any>('/profile');
+    },
+
+    // PUT /api/profile
+    updateProfile: async (data: { fullName?: string; phone?: string; address?: string; dateOfBirth?: string }) => {
+        return apiCall<{ message: string; user: any }>('/profile', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    // PUT /api/profile/password
+    changePassword: async (oldPassword: string, newPassword: string) => {
+        return apiCall<{ message: string }>('/profile/password', {
+            method: 'PUT',
+            body: JSON.stringify({ oldPassword, newPassword }),
+        });
+    },
+
+    // PUT /api/profile/avatar
+    updateAvatar: async (avatar: string) => {
+        return apiCall<{ message: string; avatar: string }>('/profile/avatar', {
+            method: 'PUT',
+            body: JSON.stringify({ avatar }),
+        });
+    },
+};
+

@@ -15,8 +15,8 @@ const config: sql.config = {
         enableArithAbort: true,
     },
     pool: {
-        max: 10,
-        min: 0,
+        max: 5, // Reduced for development
+        min: 2, // Keep minimum connections ready
         idleTimeoutMillis: 30000,
     },
 };

@@ -2,14 +2,14 @@
 import React, { useState, useMemo } from 'react';
 import { MOCK_MEDICINES } from '../constants';
 import { Medicine } from '../types';
-import { 
-  Pill, 
-  Search, 
-  Plus, 
-  AlertTriangle, 
-  CheckCircle2, 
-  MoreVertical, 
-  Package, 
+import {
+  Pill,
+  Search,
+  Plus,
+  AlertTriangle,
+  CheckCircle2,
+  MoreVertical,
+  Package,
   ShoppingCart,
   Calendar,
   ChevronDown,
@@ -20,19 +20,33 @@ import {
   TrendingUp,
   History,
   FileText,
-  Printer
+  Printer,
+  Trash2
 } from 'lucide-react';
 
 const PharmacyView: React.FC = () => {
   const [medicines, setMedicines] = useState<Medicine[]>(MOCK_MEDICINES);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<'ADD' | 'IMPORT' | 'DISPENSE'>('ADD');
+  const [modalType, setModalType] = useState<'ADD' | 'IMPORT' | 'DISPENSE' | 'EDIT'>('ADD');
   const [selectedMed, setSelectedMed] = useState<Medicine | null>(null);
-  const [notification, setNotification] = useState<{msg: string, type: 'success' | 'error'} | null>(null);
+  const [notification, setNotification] = useState<{ msg: string, type: 'success' | 'error' } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [medicineToDelete, setMedicineToDelete] = useState<Medicine | null>(null);
 
   // Form states
   const [formQty, setFormQty] = useState(0);
+  const [medicineForm, setMedicineForm] = useState({
+    name: '',
+    category: '',
+    unit: '',
+    price: 0,
+    stock: 0,
+    minThreshold: 0,
+    expiryDate: '',
+    manufacturer: '',
+    description: ''
+  });
 
   const stats = useMemo(() => ({
     totalItems: medicines.length,
@@ -51,8 +65,8 @@ const PharmacyView: React.FC = () => {
 
     const updatedMeds = medicines.map(m => {
       if (m.id === selectedMed.id) {
-        const newStock = modalType === 'IMPORT' 
-          ? m.stock + Number(formQty) 
+        const newStock = modalType === 'IMPORT'
+          ? m.stock + Number(formQty)
           : Math.max(0, m.stock - Number(formQty));
         return { ...m, stock: newStock };
       }
@@ -61,7 +75,7 @@ const PharmacyView: React.FC = () => {
 
     setMedicines(updatedMeds);
     showNotification(
-      modalType === 'IMPORT' 
+      modalType === 'IMPORT'
         ? `Đã nhập thêm ${formQty} ${selectedMed.unit} ${selectedMed.name}`
         : `Đã xuất ${formQty} ${selectedMed.unit} ${selectedMed.name} theo đơn`
     );
@@ -69,8 +83,50 @@ const PharmacyView: React.FC = () => {
     setFormQty(0);
   };
 
-  const filteredMedicines = medicines.filter(m => 
-    m.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const handleAddMedicine = async () => {
+    try {
+      const newMedicine = {
+        id: `MED${Date.now()}`,
+        ...medicineForm,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      setMedicines([...medicines, newMedicine as any]);
+      showNotification(`Đã thêm thuốc ${medicineForm.name}`, 'success');
+      setIsModalOpen(false);
+      setMedicineForm({ name: '', category: '', unit: '', price: 0, stock: 0, minThreshold: 0, expiryDate: '', manufacturer: '', description: '' });
+    } catch (error: any) {
+      showNotification(error.message || 'Không thể thêm thuốc', 'error');
+    }
+  };
+
+  const handleEditMedicine = async () => {
+    if (!selectedMed) return;
+    try {
+      setMedicines(medicines.map(m => m.id === selectedMed.id ? { ...m, ...medicineForm, updatedAt: new Date().toISOString() } : m));
+      showNotification(`Đã cập nhật thuốc ${medicineForm.name}`, 'success');
+      setIsModalOpen(false);
+      setSelectedMed(null);
+      setMedicineForm({ name: '', category: '', unit: '', price: 0, stock: 0, minThreshold: 0, expiryDate: '', manufacturer: '', description: '' });
+    } catch (error: any) {
+      showNotification(error.message || 'Không thể cập nhật thuốc', 'error');
+    }
+  };
+
+  const handleDeleteMedicine = async () => {
+    if (!medicineToDelete) return;
+    try {
+      setMedicines(medicines.filter(m => m.id !== medicineToDelete.id));
+      showNotification(`Đã xóa thuốc ${medicineToDelete.name}`, 'success');
+    } catch (error: any) {
+      showNotification(error.message || 'Không thể xóa thuốc', 'error');
+    }
+    setShowDeleteConfirm(false);
+    setMedicineToDelete(null);
+  };
+
+  const filteredMedicines = medicines.filter(m =>
+    m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -78,9 +134,8 @@ const PharmacyView: React.FC = () => {
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       {notification && (
         <div className="fixed top-20 right-8 z-[70] animate-in slide-in-from-right-10 duration-300">
-          <div className={`px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 border ${
-            notification.type === 'success' ? 'bg-slate-900 text-white border-slate-700' : 'bg-rose-600 text-white border-rose-500'
-          }`}>
+          <div className={`px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 border ${notification.type === 'success' ? 'bg-slate-900 text-white border-slate-700' : 'bg-rose-600 text-white border-rose-500'
+            }`}>
             <div className={`${notification.type === 'success' ? 'bg-emerald-500' : 'bg-white text-rose-600'} p-1 rounded-full`}>
               <CheckCircle2 size={16} />
             </div>
@@ -106,7 +161,7 @@ const PharmacyView: React.FC = () => {
             <Printer size={16} />
             <span>In báo cáo kho</span>
           </button>
-          <button 
+          <button
             onClick={() => { setModalType('ADD'); setIsModalOpen(true); }}
             className="flex items-center space-x-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95"
           >
@@ -153,9 +208,9 @@ const PharmacyView: React.FC = () => {
         <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Tìm tên thuốc, nhóm điều trị..." 
+            <input
+              type="text"
+              placeholder="Tìm tên thuốc, nhóm điều trị..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
@@ -207,8 +262,8 @@ const PharmacyView: React.FC = () => {
                           {med.stock} {med.unit}
                         </span>
                         <div className="w-20 h-1 bg-slate-100 rounded-full mt-1.5 overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full ${isOut ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                          <div
+                            className={`h-full rounded-full ${isOut ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'}`}
                             style={{ width: `${Math.min((med.stock / 1000) * 100, 100)}%` }}
                           />
                         </div>
@@ -226,21 +281,45 @@ const PharmacyView: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
+                        <button
                           onClick={() => { setSelectedMed(med); setModalType('IMPORT'); setIsModalOpen(true); }}
                           className="flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold hover:bg-emerald-100 transition-colors border border-emerald-100"
                         >
                           <Plus size={12} /> <span>Nhập</span>
                         </button>
-                        <button 
+                        <button
                           onClick={() => { setSelectedMed(med); setModalType('DISPENSE'); setIsModalOpen(true); }}
                           className="flex items-center space-x-1 px-2.5 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-bold hover:bg-blue-100 transition-colors border border-blue-100"
                           disabled={isOut}
                         >
                           <MinusCircle size={12} /> <span>Xuất</span>
                         </button>
-                        <button className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors">
+                        <button
+                          onClick={() => {
+                            setSelectedMed(med);
+                            setMedicineForm({
+                              name: med.name,
+                              category: med.category,
+                              unit: med.unit,
+                              price: med.price,
+                              stock: med.stock,
+                              minThreshold: med.minThreshold,
+                              expiryDate: med.expiryDate,
+                              manufacturer: med.manufacturer || '',
+                              description: med.description || ''
+                            });
+                            setModalType('EDIT');
+                            setIsModalOpen(true);
+                          }}
+                          className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                        >
                           <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => { setMedicineToDelete(med); setShowDeleteConfirm(true); }}
+                          className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </td>
@@ -256,13 +335,11 @@ const PharmacyView: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className={`p-6 flex items-center justify-between ${
-              modalType === 'IMPORT' ? 'bg-emerald-50' : modalType === 'DISPENSE' ? 'bg-blue-50' : 'bg-slate-50'
-            }`}>
+            <div className={`p-6 flex items-center justify-between ${modalType === 'IMPORT' ? 'bg-emerald-50' : modalType === 'DISPENSE' ? 'bg-blue-50' : 'bg-slate-50'
+              }`}>
               <div className="flex items-center space-x-3">
-                <div className={`p-2 rounded-xl ${
-                  modalType === 'IMPORT' ? 'bg-emerald-600 text-white' : modalType === 'DISPENSE' ? 'bg-blue-600 text-white' : 'bg-slate-900 text-white'
-                }`}>
+                <div className={`p-2 rounded-xl ${modalType === 'IMPORT' ? 'bg-emerald-600 text-white' : modalType === 'DISPENSE' ? 'bg-blue-600 text-white' : 'bg-slate-900 text-white'
+                  }`}>
                   {modalType === 'IMPORT' ? <Plus size={20} /> : modalType === 'DISPENSE' ? <MinusCircle size={20} /> : <FileText size={20} />}
                 </div>
                 <div>
@@ -295,8 +372,8 @@ const PharmacyView: React.FC = () => {
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Số lượng {modalType === 'IMPORT' ? 'nhập' : 'xuất'}</label>
                     <div className="flex items-center space-x-3">
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         value={formQty}
                         onChange={(e) => setFormQty(Number(e.target.value))}
                         className="flex-1 bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-xl font-bold focus:border-blue-500 focus:bg-white outline-none transition-all"
@@ -310,8 +387,8 @@ const PharmacyView: React.FC = () => {
                   {modalType === 'DISPENSE' && (
                     <div>
                       <label className="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Mã hồ sơ bệnh án (Option)</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                         placeholder="VD: P00124..."
                       />
@@ -323,6 +400,114 @@ const PharmacyView: React.FC = () => {
                     <p>Hành động này sẽ <b>{modalType === 'IMPORT' ? 'tăng' : 'giảm'}</b> số lượng tồn kho thực tế và ghi lại vào nhật ký Audit Log.</p>
                   </div>
                 </div>
+              ) : modalType === 'ADD' || modalType === 'EDIT' ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">Tên thuốc *</label>
+                      <input
+                        type="text"
+                        value={medicineForm.name}
+                        onChange={(e) => setMedicineForm({ ...medicineForm, name: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        placeholder="VD: Paracetamol 500mg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">Danh mục *</label>
+                      <select
+                        value={medicineForm.category}
+                        onChange={(e) => setMedicineForm({ ...medicineForm, category: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                      >
+                        <option value="">Chọn danh mục</option>
+                        <option value="Kháng sinh">Kháng sinh</option>
+                        <option value="Giảm đau">Giảm đau</option>
+                        <option value="Vitamin">Vitamin</option>
+                        <option value="Tim mạch">Tim mạch</option>
+                        <option value="Tiêu hóa">Tiêu hóa</option>
+                        <option value="Khác">Khác</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">Đơn vị *</label>
+                      <input
+                        type="text"
+                        value={medicineForm.unit}
+                        onChange={(e) => setMedicineForm({ ...medicineForm, unit: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        placeholder="VD: Viên, Hộp"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">Giá (VNĐ) *</label>
+                      <input
+                        type="number"
+                        value={medicineForm.price}
+                        onChange={(e) => setMedicineForm({ ...medicineForm, price: Number(e.target.value) })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">Tồn kho *</label>
+                      <input
+                        type="number"
+                        value={medicineForm.stock}
+                        onChange={(e) => setMedicineForm({ ...medicineForm, stock: Number(e.target.value) })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">Ngưỡng tối thiểu *</label>
+                      <input
+                        type="number"
+                        value={medicineForm.minThreshold}
+                        onChange={(e) => setMedicineForm({ ...medicineForm, minThreshold: Number(e.target.value) })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">Hạn sử dụng *</label>
+                      <input
+                        type="date"
+                        value={medicineForm.expiryDate}
+                        onChange={(e) => setMedicineForm({ ...medicineForm, expiryDate: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">Nhà sản xuất</label>
+                    <input
+                      type="text"
+                      value={medicineForm.manufacturer}
+                      onChange={(e) => setMedicineForm({ ...medicineForm, manufacturer: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                      placeholder="VD: Công ty Dược phẩm ABC"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">Mô tả</label>
+                    <textarea
+                      value={medicineForm.description}
+                      onChange={(e) => setMedicineForm({ ...medicineForm, description: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                      rows={3}
+                      placeholder="Mô tả chi tiết về thuốc..."
+                    />
+                  </div>
+                </div>
               ) : (
                 <div className="space-y-4">
                   <p className="text-sm text-center text-slate-500 italic">Tính năng thêm danh mục đang được bảo trì.</p>
@@ -331,20 +516,68 @@ const PharmacyView: React.FC = () => {
             </div>
 
             <div className="p-6 bg-slate-50 border-t border-slate-100 flex space-x-3">
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="flex-1 px-6 py-3 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-white transition-all"
               >
                 Hủy bỏ
               </button>
-              <button 
-                onClick={handleStockAction}
-                disabled={formQty <= 0 && modalType !== 'ADD'}
-                className={`flex-1 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 ${
-                  modalType === 'IMPORT' ? 'bg-emerald-600 shadow-emerald-500/20' : 'bg-blue-600 shadow-blue-500/20'
-                }`}
+              <button
+                onClick={() => {
+                  if (modalType === 'ADD') handleAddMedicine();
+                  else if (modalType === 'EDIT') handleEditMedicine();
+                  else handleStockAction();
+                }}
+                disabled={formQty <= 0 && (modalType === 'IMPORT' || modalType === 'DISPENSE')}
+                className={`flex-1 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 ${modalType === 'IMPORT' ? 'bg-emerald-600 shadow-emerald-500/20' :
+                  modalType === 'ADD' || modalType === 'EDIT' ? 'bg-blue-600 shadow-blue-500/20' :
+                    'bg-blue-600 shadow-blue-500/20'
+                  }`}
               >
-                Xác nhận thực hiện
+                {modalType === 'ADD' ? 'Thêm thuốc' : modalType === 'EDIT' ? 'Cập nhật' : 'Xác nhận thực hiện'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && medicineToDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-rose-50 rounded-full">
+                  <AlertTriangle className="text-rose-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Xác nhận xóa thuốc</h3>
+                  <p className="text-sm text-slate-500">Hành động này không thể hoàn tác</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <p className="text-slate-700">
+                Bạn có chắc chắn muốn xóa thuốc <span className="font-bold">{medicineToDelete.name}</span>?
+              </p>
+              <p className="text-sm text-slate-500 mt-2">
+                Thuốc sẽ được đánh dấu là đã xóa và không còn hiển thị trong danh sách.
+              </p>
+            </div>
+
+            <div className="p-6 bg-slate-50 flex space-x-3">
+              <button
+                onClick={() => { setShowDeleteConfirm(false); setMedicineToDelete(null); }}
+                className="flex-1 px-6 py-3 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-white transition-all"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleDeleteMedicine}
+                className="flex-1 px-6 py-3 rounded-xl text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 transition-all shadow-lg shadow-rose-500/20 active:scale-95"
+              >
+                Xác nhận xóa
               </button>
             </div>
           </div>

@@ -58,7 +58,13 @@ export class MedicalRecordModel {
         const pool = await getConnection();
         const result = await pool.request()
             .input('RecordId', sql.NVarChar, recordId)
-            .query('SELECT * FROM MedicalRecords WHERE RecordId = @RecordId');
+            .query(`
+                SELECT RecordId as recordId, PatientId as patientId, DoctorId as doctorId,
+                       RecordDate as recordDate, Diagnosis as diagnosis, Treatment as treatment,
+                       Prescription as prescription, Notes as notes,
+                       CreatedAt as createdAt, UpdatedAt as updatedAt
+                FROM MedicalRecords WHERE RecordId = @RecordId
+            `);
 
         return result.recordset[0] || null;
     }
@@ -67,7 +73,13 @@ export class MedicalRecordModel {
         const pool = await getConnection();
         const result = await pool.request()
             .input('PatientId', sql.NVarChar, patientId)
-            .query('SELECT * FROM MedicalRecords WHERE PatientId = @PatientId ORDER BY RecordDate DESC');
+            .query(`
+                SELECT RecordId as recordId, PatientId as patientId, DoctorId as doctorId,
+                       RecordDate as recordDate, Diagnosis as diagnosis, Treatment as treatment,
+                       Prescription as prescription, Notes as notes,
+                       CreatedAt as createdAt, UpdatedAt as updatedAt
+                FROM MedicalRecords WHERE PatientId = @PatientId ORDER BY RecordDate DESC
+            `);
 
         return result.recordset;
     }
@@ -76,7 +88,13 @@ export class MedicalRecordModel {
         const pool = await getConnection();
         const result = await pool.request()
             .input('DoctorId', sql.NVarChar, doctorId)
-            .query('SELECT * FROM MedicalRecords WHERE DoctorId = @DoctorId ORDER BY RecordDate DESC');
+            .query(`
+                SELECT RecordId as recordId, PatientId as patientId, DoctorId as doctorId,
+                       RecordDate as recordDate, Diagnosis as diagnosis, Treatment as treatment,
+                       Prescription as prescription, Notes as notes,
+                       CreatedAt as createdAt, UpdatedAt as updatedAt
+                FROM MedicalRecords WHERE DoctorId = @DoctorId ORDER BY RecordDate DESC
+            `);
 
         return result.recordset;
     }

@@ -100,7 +100,9 @@ export class AuthController {
             }
 
             // Check if user is active
-            if (user.status !== 'ACTIVE') {
+            console.log('🔍 Login status check:', { userId: user.userId, email: user.email, status: user.status });
+            if (!user.status || user.status.trim().toUpperCase() !== 'ACTIVE') {
+                console.log('❌ Login blocked - Account inactive');
                 res.status(403).json({ error: 'Forbidden', message: 'Account is inactive' });
                 return;
             }

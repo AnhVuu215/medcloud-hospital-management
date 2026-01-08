@@ -1,18 +1,19 @@
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { MOCK_APPOINTMENTS as INITIAL_APPOINTMENTS, SPECIALIZATIONS } from '../constants';
 import { UserRole, Appointment, User } from '../types';
-import { 
-  Calendar, 
-  Search, 
-  MoreVertical, 
-  Plus, 
-  CheckCircle2, 
-  Clock, 
-  XCircle, 
-  AlertTriangle, 
-  ChevronDown, 
-  X, 
+import {
+  Calendar,
+  Search,
+  MoreVertical,
+  Plus,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  AlertTriangle,
+  ChevronDown,
+  X,
   Check,
   ArrowUpDown,
   ChevronUp,
@@ -28,6 +29,8 @@ import {
   Phone
 } from 'lucide-react';
 import BookingModal from '../components/BookingModal';
+import AppointmentActions from '../components/AppointmentActions';
+import { appointmentAPI } from '../services/apiService';
 
 interface AppointmentViewProps {
   role: UserRole;
@@ -58,10 +61,10 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'CONFIRMED': return <span className="flex items-center text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full text-[10px] font-bold border border-emerald-100"><CheckCircle2 size={12} className="mr-1"/>Xác nhận</span>;
-      case 'PENDING': return <span className="flex items-center text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full text-[10px] font-bold border border-amber-100"><Clock size={12} className="mr-1"/>Chờ</span>;
-      case 'CANCELLED': return <span className="flex items-center text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-[10px] font-bold border border-rose-100"><XCircle size={12} className="mr-1"/>Đã hủy</span>;
-      case 'COMPLETED': return <span className="flex items-center text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full text-[10px] font-bold border border-blue-100"><CheckCircle2 size={12} className="mr-1"/>Đã khám</span>;
+      case 'CONFIRMED': return <span className="flex items-center text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full text-[10px] font-bold border border-emerald-100"><CheckCircle2 size={12} className="mr-1" />Xác nhận</span>;
+      case 'PENDING': return <span className="flex items-center text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full text-[10px] font-bold border border-amber-100"><Clock size={12} className="mr-1" />Chờ</span>;
+      case 'CANCELLED': return <span className="flex items-center text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full text-[10px] font-bold border border-rose-100"><XCircle size={12} className="mr-1" />Đã hủy</span>;
+      case 'COMPLETED': return <span className="flex items-center text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full text-[10px] font-bold border border-blue-100"><CheckCircle2 size={12} className="mr-1" />Đã khám</span>;
       default: return null;
     }
   };
@@ -72,13 +75,70 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
     if (dateFilter) result = result.filter(apt => apt.date === dateFilter);
     const query = searchQuery.toLowerCase().trim();
     if (query) {
-      result = result.filter(apt => 
+      result = result.filter(apt =>
         apt.patientName.toLowerCase().includes(query) ||
         apt.doctorName.toLowerCase().includes(query)
       );
     }
     return result;
   }, [appointments, searchQuery, specFilter, dateFilter]);
+
+  // Handlers for appointment actions
+  const handleViewDetails = async (appointmentId: string) => {
+    try {
+      const { appointment } = await appointmentAPI.getById(appointmentId);
+      alert(`Chi tiết lịch hẹn:\n${JSON.stringify(appointment, null, 2)}`);
+    } catch (error) {
+      console.error('Failed to get appointment details:', error);
+      alert('Không thể xem chi tiết lịch hẹn');
+    }
+  };
+
+  const handleUpdateStatus = async (appointmentId: string, newStatus: string) => {
+    try {
+      await appointmentAPI.updateStatus(appointmentId, newStatus);
+      // Update local state
+      setAppointments(prev => prev.map(apt =>
+        apt.id === appointmentId ? { ...apt, status: newStatus } : apt
+      ));
+      setNotification(`Đã cập nhật trạng thái thành ${newStatus}`);
+      setTimeout(() => setNotification(null), 3000);
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      alert('Không thể cập nhật trạng thái');
+    }
+  };
+
+  const handleCancel = async (appointmentId: string) => {
+    const reason = prompt('Lý do hủy lịch hẹn:');
+    if (!reason) return;
+
+    try {
+      await appointmentAPI.delete(appointmentId, reason);
+      setAppointments(prev => prev.map(apt =>
+        apt.id === appointmentId ? { ...apt, status: 'CANCELLED' } : apt
+      ));
+      setNotification('Đã hủy lịch hẹn');
+      setTimeout(() => setNotification(null), 3000);
+    } catch (error) {
+      console.error('Failed to cancel appointment:', error);
+      alert('Không thể hủy lịch hẹn');
+    }
+  };
+
+  const handleDelete = async (appointmentId: string) => {
+    if (!confirm('Bạn có chắc muốn xóa lịch hẹn này?')) return;
+
+    try {
+      await appointmentAPI.delete(appointmentId);
+      setAppointments(prev => prev.filter(apt => apt.id !== appointmentId));
+      setNotification('Đã xóa lịch hẹn');
+      setTimeout(() => setNotification(null), 3000);
+    } catch (error) {
+      console.error('Failed to delete appointment:', error);
+      alert('Không thể xóa lịch hẹn');
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -89,7 +149,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
           <p className="text-slate-500 text-xs md:text-sm">Theo dõi và điều phối lịch hẹn thời gian thực.</p>
         </div>
         {(role === UserRole.ADMIN || role === UserRole.RECEPTIONIST || role === UserRole.PATIENT) && (
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="w-full md:w-auto flex items-center justify-center space-x-2 bg-[#da251d] text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-all"
           >
@@ -102,9 +162,9 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-          <input 
-            type="text" 
-            placeholder="Tìm bệnh nhân..." 
+          <input
+            type="text"
+            placeholder="Tìm bệnh nhân..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-red-500/20"
@@ -112,7 +172,7 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
         </div>
         <div className="relative">
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-          <select 
+          <select
             value={specFilter}
             onChange={(e) => setSpecFilter(e.target.value)}
             className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-sm appearance-none outline-none"
@@ -123,8 +183,8 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
         </div>
         <div className="relative">
           <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-          <input 
-            type="date" 
+          <input
+            type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
             className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-sm outline-none"
@@ -159,8 +219,16 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
                   {apt.time} | {apt.date}
                 </td>
                 <td className="px-6 py-4">{getStatusBadge(apt.status)}</td>
-                <td className="px-6 py-4 text-right">
-                  <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400"><MoreVertical size={18} /></button>
+                <td className="px-6 py-4 text-right relative">
+                  <AppointmentActions
+                    appointmentId={apt.id}
+                    status={apt.status}
+                    onViewDetails={() => handleViewDetails(apt.id)}
+                    onUpdateStatus={(status) => handleUpdateStatus(apt.id, status)}
+                    onCancel={() => handleCancel(apt.id)}
+                    onDelete={() => handleDelete(apt.id)}
+                    userRole={role}
+                  />
                 </td>
               </tr>
             ))}
@@ -216,14 +284,14 @@ const AppointmentView: React.FC<AppointmentViewProps> = ({ role, user }) => {
         </div>
       )}
 
-      <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onConfirm={() => {}} />
+      <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onConfirm={() => { }} />
     </div>
   );
 };
 
 const UserIcon = ({ size, className }: { size: number, className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
   </svg>
 );
 

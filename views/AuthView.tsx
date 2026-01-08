@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
 import { UserRole, User } from '../types';
-import { ShieldCheck, Mail, Lock, User as UserIcon, ArrowRight, PlusCircle, Activity, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, User as UserIcon, ArrowRight, PlusCircle, Activity, ChevronRight, ArrowLeft } from 'lucide-react';
 
 interface AuthViewProps {
   onLogin: (user: User) => void;
+  onBackToLanding?: () => void;
 }
 
-const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
+const AuthView: React.FC<AuthViewProps> = ({ onLogin, onBackToLanding }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,33 +16,67 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
   const [role, setRole] = useState<UserRole>(UserRole.PATIENT);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Giả lập xử lý API
-    setTimeout(() => {
-      const mockUser: User = {
-        id: email === 'admin@medcloud.vn' ? 'ADMIN_01' : 'U_' + Math.floor(Math.random() * 1000),
-        name: isLogin ? (email === 'admin@medcloud.vn' ? 'Quản trị viên Hệ thống' : 'Người dùng MedCloud') : name,
-        email: email,
-        role: email === 'admin@medcloud.vn' ? UserRole.ADMIN : role,
-        status: 'ACTIVE'
-      };
-      onLogin(mockUser);
+
+    try {
+      const API_URL = 'http://localhost:5000/api';
+
+      if (isLogin) {
+        // Login API call
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          alert(error.message || 'Đăng nhập thất bại');
+          setLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        onLogin(data.user);
+      } else {
+        // Register API call
+        const response = await fetch(`${API_URL}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, role })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          alert(error.message || 'Đăng ký thất bại');
+          setLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+        alert('Đăng ký thành công! Vui lòng đăng nhập.');
+        setIsLogin(true);
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      alert('Lỗi kết nối đến server');
+    } finally {
       setLoading(false);
-    }, 1200);
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-inter">
       <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100">
-        
+
         {/* Left Side: Branding & Info */}
         <div className="hidden lg:flex flex-col justify-between p-12 bg-[#da251d] text-[#fffe00] relative overflow-hidden">
           <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-red-800 rounded-full opacity-50 blur-3xl"></div>
           <div className="absolute -left-10 top-20 w-40 h-40 bg-red-400 rounded-full opacity-20 blur-2xl"></div>
-          
+
           <div className="relative z-10 flex items-center space-x-3">
             <div className="bg-[#fffe00] p-2 rounded-xl shadow-lg">
               <PlusCircle className="text-[#da251d]" size={32} />
@@ -51,7 +86,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
 
           <div className="relative z-10 space-y-6">
             <h1 className="text-4xl font-extrabold leading-tight">
-              Giải pháp quản lý <br/> y tế thông minh & <br/> bảo mật tuyệt đối.
+              Giải pháp quản lý <br /> y tế thông minh & <br /> bảo mật tuyệt đối.
             </h1>
             <p className="text-red-100 text-lg opacity-90 max-w-sm">
               Đồng hành cùng các bệnh viện trong hành trình chuyển đổi số, tối ưu hóa quy trình thăm khám.
@@ -77,6 +112,17 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
 
         {/* Right Side: Form */}
         <div className="p-8 lg:p-16 flex flex-col justify-center bg-white">
+          {/* Back to Landing Button */}
+          {onBackToLanding && (
+            <button
+              onClick={onBackToLanding}
+              className="mb-6 flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors group w-fit"
+            >
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              <span className="text-sm font-semibold">Quay lại trang chủ</span>
+            </button>
+          )}
+
           <div className="mb-10 text-center lg:text-left">
             <h2 className="text-3xl font-black text-slate-900 mb-2">
               {isLogin ? 'Chào mừng trở lại' : 'Tạo tài khoản mới'}
@@ -92,8 +138,8 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Họ và tên</label>
                 <div className="relative">
                   <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -108,8 +154,8 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Địa chỉ Email</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -126,8 +172,8 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
               </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -141,14 +187,14 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Bạn là ai?</label>
                 <div className="grid grid-cols-2 gap-3">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setRole(UserRole.PATIENT)}
                     className={`py-3 rounded-xl border-2 text-xs font-bold transition-all ${role === UserRole.PATIENT ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-100 text-slate-500'}`}
                   >
                     Bệnh nhân
                   </button>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setRole(UserRole.DOCTOR)}
                     className={`py-3 rounded-xl border-2 text-xs font-bold transition-all ${role === UserRole.DOCTOR ? 'border-blue-600 bg-blue-50 text-blue-600' : 'border-slate-100 text-slate-500'}`}
@@ -159,8 +205,8 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
               </div>
             )}
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
               className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/25 active:scale-[0.98] disabled:opacity-70"
             >
@@ -177,8 +223,8 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
 
           <div className="mt-8 text-center">
             <p className="text-sm text-slate-500">
-              {isLogin ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'} 
-              <button 
+              {isLogin ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'}
+              <button
                 onClick={() => setIsLogin(!isLogin)}
                 className="ml-2 text-blue-600 font-bold hover:underline"
               >

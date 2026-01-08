@@ -172,4 +172,60 @@ export class UserController {
             res.status(500).json({ error: 'Server Error', message: 'Failed to update user status' });
         }
     }
+
+    // DELETE /api/users/:id - Delete user (Admin only)
+    static async deleteUser(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+
+            const user = await UserModel.findById(id);
+            if (!user) {
+                res.status(404).json({ error: 'Not Found', message: 'User not found' });
+                return;
+            }
+
+            await UserModel.delete(id);
+
+            await logAudit({
+                userId: req.user!.userId,
+                action: 'DELETE_USER',
+                target: `User ${id}`,
+                details: `Deleted user: ${user.name} (${user.email})`,
+                ...extractAuditInfo(req)
+            });
+
+            res.status(200).json({ message: 'User deleted successfully' });
+        } catch (error) {
+            console.error('Delete user error:', error);
+            res.status(500).json({ error: 'Server Error', message: 'Failed to delete user' });
+        }
+    }
+
+    // PUT /api/users/:id/restore - Restore soft-deleted user (Admin only)
+    static async restoreUser(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+
+            const user = await UserModel.findById(id);
+            if (!user) {
+                res.status(404).json({ error: 'Not Found', message: 'User not found' });
+                return;
+            }
+
+            await UserModel.restore(id);
+
+            await logAudit({
+                userId: req.user!.userId,
+                action: 'RESTORE_USER',
+                target: `User ${id}`,
+                details: `Restored user: ${user.name} (${user.email})`,
+                ...extractAuditInfo(req)
+            });
+
+            res.status(200).json({ message: 'User restored successfully' });
+        } catch (error) {
+            console.error('Restore user error:', error);
+            res.status(500).json({ error: 'Server Error', message: 'Failed to restore user' });
+        }
+    }
 }

@@ -15,8 +15,10 @@ import PaymentInsuranceView from './views/PaymentInsuranceView';
 import PatientPortalView from './views/PatientPortalView';
 import UserManagementView from './views/UserManagementView';
 import AuthView from './views/AuthView';
+import LandingView from './views/LandingView';
 
 const App: React.FC = () => {
+  const [showLanding, setShowLanding] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
@@ -40,8 +42,14 @@ const App: React.FC = () => {
     }
   }, [currentUser?.role]);
 
+  // Show landing page first
+  if (showLanding) {
+    return <LandingView onNavigateToLogin={() => setShowLanding(false)} />;
+  }
+
+  // Then show login page
   if (!isLoggedIn || !currentUser) {
-    return <AuthView onLogin={handleLogin} />;
+    return <AuthView onLogin={handleLogin} onBackToLanding={() => setShowLanding(true)} />;
   }
 
   const renderContent = () => {
@@ -68,7 +76,7 @@ const App: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <Header user={currentUser} onLogout={handleLogout} />
-        
+
         <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 lg:pb-6">
           <div className="max-w-7xl mx-auto flex flex-col min-h-full">
             <div className="flex-1">

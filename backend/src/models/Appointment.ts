@@ -51,7 +51,13 @@ export class AppointmentModel {
         const pool = await getConnection();
         const result = await pool.request()
             .input('AppointmentId', sql.NVarChar, appointmentId)
-            .query('SELECT * FROM Appointments WHERE AppointmentId = @AppointmentId');
+            .query(`
+                SELECT AppointmentId as appointmentId, PatientId as patientId, DoctorId as doctorId,
+                       AppointmentDate as appointmentDate, AppointmentTime as appointmentTime,
+                       Status as status, Reason as reason, Notes as notes,
+                       CreatedAt as createdAt, UpdatedAt as updatedAt
+                FROM Appointments WHERE AppointmentId = @AppointmentId
+            `);
 
         return result.recordset[0] || null;
     }
@@ -60,14 +66,24 @@ export class AppointmentModel {
         const pool = await getConnection();
         const result = await pool.request()
             .input('PatientId', sql.NVarChar, patientId)
-            .query('SELECT * FROM Appointments WHERE PatientId = @PatientId ORDER BY AppointmentDate DESC, AppointmentTime DESC');
+            .query(`
+                SELECT AppointmentId as appointmentId, PatientId as patientId, DoctorId as doctorId,
+                       AppointmentDate as appointmentDate, AppointmentTime as appointmentTime,
+                       Status as status, Reason as reason, Notes as notes,
+                       CreatedAt as createdAt, UpdatedAt as updatedAt
+                FROM Appointments WHERE PatientId = @PatientId ORDER BY AppointmentDate DESC, AppointmentTime DESC
+            `);
 
         return result.recordset;
     }
 
     static async findByDoctor(doctorId: string, date?: string): Promise<Appointment[]> {
         const pool = await getConnection();
-        let query = 'SELECT * FROM Appointments WHERE DoctorId = @DoctorId';
+        let query = `SELECT AppointmentId as appointmentId, PatientId as patientId, DoctorId as doctorId,
+                            AppointmentDate as appointmentDate, AppointmentTime as appointmentTime,
+                            Status as status, Reason as reason, Notes as notes,
+                            CreatedAt as createdAt, UpdatedAt as updatedAt
+                     FROM Appointments WHERE DoctorId = @DoctorId`;
         const request = pool.request().input('DoctorId', sql.NVarChar, doctorId);
 
         if (date) {
@@ -82,7 +98,11 @@ export class AppointmentModel {
 
     static async findAll(filters?: { status?: string; date?: string }): Promise<Appointment[]> {
         const pool = await getConnection();
-        let query = 'SELECT * FROM Appointments WHERE 1=1';
+        let query = `SELECT AppointmentId as appointmentId, PatientId as patientId, DoctorId as doctorId,
+                            AppointmentDate as appointmentDate, AppointmentTime as appointmentTime,
+                            Status as status, Reason as reason, Notes as notes,
+                            CreatedAt as createdAt, UpdatedAt as updatedAt
+                     FROM Appointments WHERE 1=1`;
         const request = pool.request();
 
         if (filters?.status) {

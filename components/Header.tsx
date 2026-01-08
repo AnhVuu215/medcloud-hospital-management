@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
 import { Bell, Search, User as UserIcon, LogOut, ChevronDown, Settings, ShieldCheck, Menu } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 interface HeaderProps {
   user: User;
@@ -24,8 +25,8 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
       <div className="hidden md:flex items-center flex-1 max-w-md">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Tìm kiếm nhanh..."
             className="w-full bg-slate-50 border border-slate-100 rounded-full py-2.5 pl-10 pr-4 text-sm focus:ring-4 focus:ring-blue-500/10 focus:bg-white outline-none transition-all shadow-sm"
           />
@@ -38,13 +39,10 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
           <span className="text-[9px] font-bold uppercase tracking-widest">Secured</span>
         </div>
 
-        <div className="relative cursor-pointer hover:bg-slate-50 p-2 rounded-full transition-colors">
-          <Bell className="text-slate-500" size={20} />
-          <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border-2 border-white">2</span>
-        </div>
+        <NotificationBell />
 
         <div className="relative">
-          <div 
+          <div
             onClick={() => setShowDropdown(!showDropdown)}
             className="flex items-center space-x-2 md:space-x-3 pl-2 md:pl-6 md:border-l md:border-slate-200 cursor-pointer group select-none"
           >
@@ -64,8 +62,8 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
               <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)}></div>
               <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-20 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
                 <div className="px-4 py-3 border-b border-slate-50 mb-1 md:hidden">
-                   <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
-                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{user.role}</p>
+                  <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{user.role}</p>
                 </div>
                 <button className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
                   <UserIcon size={16} className="text-slate-400" />
@@ -76,7 +74,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
                   <span className="font-medium">Cài đặt</span>
                 </button>
                 <div className="h-px bg-slate-50 my-1 mx-4"></div>
-                <button 
+                <button
                   onClick={onLogout}
                   className="w-full flex items-center space-x-3 px-4 py-4 text-sm text-rose-600 hover:bg-rose-50 transition-colors"
                 >

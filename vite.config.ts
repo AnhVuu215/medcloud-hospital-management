@@ -8,6 +8,10 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3002,
       host: '0.0.0.0',
+      strictPort: true,
+      hmr: {
+        overlay: false // Disable error overlay to reduce lag
+      }
     },
     plugins: [react()],
     define: {
@@ -18,6 +22,21 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       }
+    },
+    build: {
+      sourcemap: false, // Disable sourcemap in dev for faster builds
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom'],
+            'vendor-charts': ['recharts'],
+            'vendor-icons': ['lucide-react']
+          }
+        }
+      }
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom', 'lucide-react']
     }
   };
 });

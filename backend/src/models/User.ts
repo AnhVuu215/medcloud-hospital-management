@@ -38,8 +38,30 @@ export class UserModel {
         const pool = await getConnection();
         const result = await pool.request()
             .input('Email', sql.NVarChar, email)
-            .query('SELECT * FROM Users WHERE Email = @Email');
+            .query(`
+                SELECT 
+                    UserId as userId,
+                    Name as name,
+                    Email as email,
+                    PasswordHash as passwordHash,
+                    Role as role,
+                    Status as status,
+                    Phone as phone,
+                    Address as address,
+                    DateOfBirth as dateOfBirth,
+                    BloodType as bloodType,
+                    Specialization as specialization,
+                    Department as department,
+                    CreatedAt as createdAt,
+                    UpdatedAt as updatedAt,
+                    LastLogin as lastLogin
+                FROM Users WHERE Email = @Email
+            `);
 
+        console.log('🔍 findByEmail result:', { email, found: !!result.recordset[0], recordCount: result.recordset.length });
+        if (result.recordset[0]) {
+            console.log('📋 User data:', { userId: result.recordset[0].userId, email: result.recordset[0].email, status: result.recordset[0].status });
+        }
         return result.recordset[0] || null;
     }
 
@@ -47,7 +69,16 @@ export class UserModel {
         const pool = await getConnection();
         const result = await pool.request()
             .input('UserId', sql.NVarChar, userId)
-            .query('SELECT * FROM Users WHERE UserId = @UserId');
+            .query(`
+                SELECT 
+                    UserId as userId, Name as name, Email as email,
+                    PasswordHash as passwordHash, Role as role, Status as status,
+                    Phone as phone, Address as address, DateOfBirth as dateOfBirth,
+                    BloodType as bloodType, Specialization as specialization,
+                    Department as department, CreatedAt as createdAt,
+                    UpdatedAt as updatedAt, LastLogin as lastLogin
+                FROM Users WHERE UserId = @UserId
+            `);
 
         return result.recordset[0] || null;
     }
@@ -84,24 +115,35 @@ export class UserModel {
             .query('UPDATE Users SET LastLogin = GETDATE() WHERE UserId = @UserId');
     }
 
-    static async findAll(filters?: { role?: string; status?: string }): Promise<User[]> {
+    static async findAll(filters: { role?: string; status?: string } = {}): Promise<User[]> {
         const pool = await getConnection();
-        let query = 'SELECT * FROM Users WHERE 1=1';
         const request = pool.request();
 
-        if (filters?.role) {
+        let query = `
+            SELECT 
+                UserId as userId, Name as name, Email as email, 
+                Role as role, Status as status, Phone as phoneNumber,
+                Address as address, DateOfBirth as dateOfBirth, BloodType as bloodType,
+                CreatedAt as createdAt, UpdatedAt as updatedAt, LastLogin as lastLogin
+            FROM Users
+            WHERE DeletedAt IS NULL
+        `;
+
+        if (filters.role) {
             query += ' AND Role = @Role';
             request.input('Role', sql.NVarChar, filters.role);
         }
 
-        if (filters?.status) {
+        if (filters.status) {
             query += ' AND Status = @Status';
             request.input('Status', sql.NVarChar, filters.status);
         }
 
-        query += ' ORDER BY CreatedAt DESC';
         const result = await request.query(query);
-        return result.recordset;
+        return result.recordset.map(record => ({
+            ...record,
+            userId: record.userId
+        }));
     }
 
     static async update(userId: string, updateData: Partial<User>): Promise<User> {
@@ -149,5 +191,21 @@ export class UserModel {
 
     static async findPatients(): Promise<User[]> {
         return this.findAll({ role: 'PATIENT' });
+    }
+
+    static async delete(userId: string): Promise<void> {
+        const pool = await getConnection();
+        // Soft delete: set DeletedAt timestamp instead of hard delete
+        await pool.request()
+            .input('UserId', sql.NVarChar, userId)
+            .query('UPDATE Users SET DeletedAt = GETDATE() WHERE UserId = @UserId');
+    }
+
+    static async restore(userId: string): Promise<void> {
+        const pool = await getConnection();
+        // Restore soft-deleted user
+        await pool.request()
+            .input('UserId', sql.NVarChar, userId)
+            .query('UPDATE Users SET DeletedAt = NULL WHERE UserId = @UserId');
     }
 }

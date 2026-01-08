@@ -22,4 +22,10 @@ router.put('/:id', UserController.updateUser);
 // Update user status (Admin only)
 router.put('/:id/status', requireAdmin, UserController.updateUserStatus);
 
+// Delete user (Admin only)
+router.delete('/:id', requireAdmin, UserController.deleteUser);
+
+// Restore user (Admin only)
+router.put('/:id/restore', requireAdmin, UserController.restoreUser);
+
 export default router;

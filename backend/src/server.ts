@@ -6,6 +6,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { getConnection } from './config/database.js';
+import { connectMongoDB } from './config/mongodb.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 // Import routes
@@ -14,6 +15,8 @@ import userRoutes from './routes/user.routes.js';
 import appointmentRoutes from './routes/appointment.routes.js';
 import medicineRoutes from './routes/medicine.routes.js';
 import medicalRecordRoutes from './routes/medicalRecord.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import reportRoutes from './routes/report.routes.js';
 
 // Load environment variables
 dotenv.config();
@@ -73,7 +76,8 @@ app.get('/api', (_req: Request, res: Response) => {
             medicalRecords: '/api/medical-records',
             medicines: '/api/medicines',
             payments: '/api/payments',
-            schedules: '/api/schedules'
+            schedules: '/api/schedules',
+            notifications: '/api/notifications'
         }
     });
 });
@@ -84,6 +88,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/reports', reportRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
@@ -99,9 +105,12 @@ app.use(errorHandler);
 // Start server
 async function startServer() {
     try {
-        // Test database connection
+        // Test SQL Server connection
         await getConnection();
-        console.log('✅ Database connected successfully');
+        console.log('✅ SQL Server connected successfully');
+
+        // Connect to MongoDB
+        await connectMongoDB();
 
         app.listen(PORT, () => {
             console.log(`🚀 Server is running on port ${PORT}`);

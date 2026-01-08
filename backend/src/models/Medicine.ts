@@ -14,6 +14,7 @@ export interface Medicine {
     description?: string;
     createdAt?: Date;
     updatedAt?: Date;
+    deletedAt?: Date | null;
 }
 
 export interface CreateMedicineData {
@@ -33,7 +34,7 @@ export class MedicineModel {
     static async create(data: CreateMedicineData): Promise<Medicine> {
         const pool = await getConnection();
 
-        await pool.request()
+        const result = await pool.request()
             .input('MedicineId', sql.NVarChar, data.medicineId)
             .input('Name', sql.NVarChar, data.name)
             .input('Category', sql.NVarChar, data.category)
@@ -46,42 +47,90 @@ export class MedicineModel {
             .input('Description', sql.NVarChar, data.description || null)
             .query(`
                 INSERT INTO Medicines (MedicineId, Name, Category, Unit, Stock, MinThreshold, Price, ExpiryDate, Manufacturer, Description)
+                OUTPUT INSERTED.*
                 VALUES (@MedicineId, @Name, @Category, @Unit, @Stock, @MinThreshold, @Price, @ExpiryDate, @Manufacturer, @Description)
             `);
 
-        const medicine = await this.findById(data.medicineId);
-        if (!medicine) throw new Error('Failed to create medicine');
-        return medicine;
+        return result.recordset[0];
     }
 
     static async findById(medicineId: string): Promise<Medicine | null> {
         const pool = await getConnection();
         const result = await pool.request()
             .input('MedicineId', sql.NVarChar, medicineId)
-            .query('SELECT * FROM Medicines WHERE MedicineId = @MedicineId');
+            .query(`
+                SELECT MedicineId as medicineId, Name as name, Category as category,
+                       Unit as unit, Price as price, Stock as stock, MinThreshold as minThreshold,
+                       ExpiryDate as expiryDate, Manufacturer as manufacturer,
+                       Description as description, CreatedAt as createdAt, UpdatedAt as updatedAt
+                FROM Medicines WHERE MedicineId = @MedicineId
+            `);
 
         return result.recordset[0] || null;
     }
 
-    static async findAll(filters?: { category?: string }): Promise<Medicine[]> {
+    static async findAll(filters?: {
+        category?: string;
+        search?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<{ medicines: Medicine[]; total: number; page: number; totalPages: number }> {
         const pool = await getConnection();
-        let query = 'SELECT * FROM Medicines WHERE 1=1';
+        const page = filters?.page || 1;
+        const limit = filters?.limit || 20;
+        const offset = (page - 1) * limit;
+
+        let whereClause = 'WHERE DeletedAt IS NULL';
         const request = pool.request();
 
         if (filters?.category) {
-            query += ' AND Category = @Category';
+            whereClause += ' AND Category = @Category';
             request.input('Category', sql.NVarChar, filters.category);
         }
 
-        query += ' ORDER BY Name';
-        const result = await request.query(query);
-        return result.recordset;
+        if (filters?.search) {
+            whereClause += ' AND (Name LIKE @Search OR MedicineId LIKE @Search)';
+            request.input('Search', sql.NVarChar, `%${filters.search}%`);
+        }
+
+        // Get total count
+        const countResult = await request.query(`SELECT COUNT(*) as total FROM Medicines ${whereClause}`);
+        const total = countResult.recordset[0].total;
+        const totalPages = Math.ceil(total / limit);
+
+        // Get paginated results
+        request.input('Limit', sql.Int, limit);
+        request.input('Offset', sql.Int, offset);
+
+        const result = await request.query(`
+            SELECT MedicineId as medicineId, Name as name, Category as category,
+                   Unit as unit, Price as price, Stock as stock, MinThreshold as minThreshold,
+                   ExpiryDate as expiryDate, Manufacturer as manufacturer,
+                   Description as description, CreatedAt as createdAt, UpdatedAt as updatedAt
+            FROM Medicines ${whereClause}
+            ORDER BY Name
+            OFFSET @Offset ROWS
+            FETCH NEXT @Limit ROWS ONLY
+        `);
+
+        return {
+            medicines: result.recordset,
+            total,
+            page,
+            totalPages
+        };
     }
 
     static async findLowStock(): Promise<Medicine[]> {
         const pool = await getConnection();
         const result = await pool.request()
-            .query('SELECT * FROM Medicines WHERE Stock <= MinThreshold ORDER BY Stock ASC');
+            .query(`
+                SELECT MedicineId as medicineId, Name as name, Category as category,
+                       Unit as unit, Price as price, Stock as stock, MinThreshold as minThreshold,
+                       ExpiryDate as expiryDate, Manufacturer as manufacturer,
+                       Description as description, CreatedAt as createdAt, UpdatedAt as updatedAt
+                FROM Medicines WHERE Stock <= MinThreshold ORDER BY Stock ASC
+            `);
 
         return result.recordset;
     }
@@ -125,6 +174,13 @@ export class MedicineModel {
         const pool = await getConnection();
         await pool.request()
             .input('MedicineId', sql.NVarChar, medicineId)
-            .query('DELETE FROM Medicines WHERE MedicineId = @MedicineId');
+            .query('UPDATE Medicines SET DeletedAt = GETDATE() WHERE MedicineId = @MedicineId');
+    }
+
+    static async restore(medicineId: string): Promise<void> {
+        const pool = await getConnection();
+        await pool.request()
+            .input('MedicineId', sql.NVarChar, medicineId)
+            .query('UPDATE Medicines SET DeletedAt = NULL WHERE MedicineId = @MedicineId');
     }
 }

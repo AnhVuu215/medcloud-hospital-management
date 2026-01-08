@@ -8,19 +8,28 @@ export class MedicineController {
     // GET /api/medicines - List all medicines
     static async listMedicines(req: AuthRequest, res: Response): Promise<void> {
         try {
-            const { category } = req.query;
-            const filters: { category?: string } = {};
+            const { category, search, page, limit } = req.query;
+            const filters: {
+                category?: string;
+                search?: string;
+                page?: number;
+                limit?: number;
+            } = {};
+
             if (category) filters.category = category as string;
+            if (search) filters.search = search as string;
+            if (page) filters.page = parseInt(page as string);
+            if (limit) filters.limit = parseInt(limit as string);
 
-            const medicines = await MedicineModel.findAll(filters);
+            const result = await MedicineModel.findAll(filters);
 
-            res.status(200).json({
-                count: medicines.length,
-                medicines
-            });
+            // Add cache headers for better performance
+            res.setHeader('Cache-Control', 'public, max-age=60'); // Cache for 60 seconds
+
+            res.status(200).json(result);
         } catch (error) {
             console.error('List medicines error:', error);
-            res.status(500).json({ error: 'Server Error', message: 'Failed to list medicines' });
+            res.status(500).json({ error: 'Server Error', message: 'Failed to retrieve medicines' });
         }
     }
 

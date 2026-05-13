@@ -1,127 +1,114 @@
 <div align="center">
+
 <img width="1200" height="475" alt="MedCloud Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 
-# 🏥 MedCloud - Hệ Thống Quản Lý Bệnh Viện Thông Minh
+# MedCloud — Hospital Management System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-19.2.3-61dafb.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-3178c6.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933.svg)](https://nodejs.org/)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-2019+-CC2927.svg)](https://www.microsoft.com/sql-server)
 
-**Giải pháp quản lý bệnh viện toàn diện với công nghệ hiện đại**
+**Giải pháp quản lý bệnh viện toàn diện — hiện đại, bảo mật, dễ mở rộng**
 
-[Tính năng](#-tính-năng) • [Công nghệ](#️-công-nghệ-sử-dụng) • [Cài đặt](#-cài-đặt) • [Sử dụng](#-sử-dụng) • [API](#-api-documentation)
+[Tính năng](#-tính-năng) · [Công nghệ](#️-công-nghệ) · [Cài đặt](#-cài-đặt) · [Sử dụng](#-sử-dụng) · [API](#-api-documentation) · [Bảo mật](#-bảo-mật)
 
 </div>
 
 ---
 
-## 📋 Giới thiệu
+## Giới thiệu
 
-**MedCloud** là hệ thống quản lý bệnh viện thông minh, được xây dựng với mục tiêu số hóa và tối ưu hóa quy trình vận hành bệnh viện. Hệ thống cung cấp giải pháp toàn diện từ quản lý bệnh nhân, lịch hẹn, hồ sơ y tế, đến quản lý nhà thuốc, thanh toán và bảo hiểm.
+**MedCloud** là hệ thống quản lý bệnh viện được xây dựng nhằm số hóa và tối ưu hóa toàn bộ quy trình vận hành: từ quản lý bệnh nhân, đặt lịch hẹn, hồ sơ bệnh án điện tử, đến nhà thuốc, thanh toán và bảo hiểm y tế.
 
-### 🎯 Mục tiêu
+Hệ thống hướng đến ba mục tiêu cốt lõi:
 
-- ✅ Tự động hóa quy trình quản lý bệnh viện
-- ✅ Cải thiện trải nghiệm bệnh nhân
-- ✅ Tăng hiệu quả làm việc của nhân viên y tế
-- ✅ Đảm bảo an toàn và bảo mật thông tin y tế
-- ✅ Hỗ trợ ra quyết định dựa trên dữ liệu
+- **Tự động hóa** — giảm thiểu thao tác thủ công, tăng tốc độ xử lý nghiệp vụ
+- **Minh bạch** — mọi thao tác đều được ghi log, dễ kiểm tra và truy vết
+- **Bảo mật** — tuân thủ các tiêu chuẩn bảo mật thông tin y tế
 
 ---
 
 ## ✨ Tính năng
 
-### 👥 Quản lý Người dùng & Phân quyền
-- **Đa vai trò**: Admin, Bác sĩ, Y tá, Dược sĩ, Kế toán, Bệnh nhân
-- **Xác thực an toàn**: JWT Authentication với bcrypt
-- **Phân quyền chi tiết**: Role-based access control (RBAC)
-- **Quản lý tài khoản**: Tạo, sửa, xóa mềm người dùng
+### Quản lý Người dùng & Phân quyền
+- Hỗ trợ đa vai trò: **Admin, Bác sĩ, Y tá, Dược sĩ, Kế toán, Bệnh nhân**
+- Xác thực bằng JWT + mã hóa mật khẩu bcrypt
+- Phân quyền chi tiết theo vai trò (RBAC)
+- Quản lý tài khoản: tạo, chỉnh sửa, xóa mềm
 
-### 📅 Quản lý Lịch hẹn
+### Quản lý Lịch hẹn
 - Đặt lịch khám trực tuyến
 - Quản lý lịch làm việc bác sĩ
+- Theo dõi trạng thái cuộc hẹn: `Pending` → `Confirmed` → `Completed` / `Cancelled`
 - Thông báo và nhắc nhở tự động
-- Theo dõi trạng thái cuộc hẹn (Pending, Confirmed, Completed, Cancelled)
 
-### 📋 Hồ sơ Bệnh án Điện tử (EMR)
-- Lưu trữ hồ sơ y tế điện tử
-- Lịch sử khám bệnh chi tiết
-- Kết quả xét nghiệm và chẩn đoán
+### Hồ sơ Bệnh án Điện tử (EMR)
+- Lưu trữ và truy xuất hồ sơ y tế điện tử
+- Lịch sử khám bệnh, kết quả xét nghiệm, chẩn đoán
 - Đơn thuốc điện tử
 - Hình ảnh y tế (X-ray, CT, MRI)
 
-### 💊 Quản lý Nhà thuốc
-- Quản lý kho thuốc
-- Theo dõi tồn kho và hạn sử dụng
+### Quản lý Nhà thuốc
+- Quản lý kho thuốc, theo dõi tồn kho và hạn sử dụng
 - Cảnh báo thuốc sắp hết
-- Quản lý đơn thuốc
-- Xuất nhập tồn
+- Quản lý đơn thuốc và xuất nhập tồn
 
-### 💳 Thanh toán & Bảo hiểm
-- Quản lý hóa đơn
-- Tích hợp bảo hiểm y tế
-- Nhiều phương thức thanh toán
-- Báo cáo tài chính
-- Xuất hóa đơn Excel
+### Thanh toán & Bảo hiểm
+- Quản lý hóa đơn, tích hợp bảo hiểm y tế
+- Hỗ trợ nhiều phương thức thanh toán
+- Báo cáo tài chính và xuất hóa đơn Excel
 
-### 🏥 Cổng thông tin Bệnh nhân
-- Xem lịch sử khám bệnh
-- Đặt lịch hẹn trực tuyến
-- Xem kết quả xét nghiệm
-- Thanh toán trực tuyến
-- Tải xuống hồ sơ y tế
+### Cổng thông tin Bệnh nhân
+- Xem lịch sử khám bệnh và kết quả xét nghiệm
+- Đặt lịch hẹn và thanh toán trực tuyến
+- Tải xuống hồ sơ y tế cá nhân
 
-### 📊 Dashboard & Báo cáo
+### Dashboard & Báo cáo
 - Thống kê tổng quan theo thời gian thực
-- Biểu đồ trực quan với Recharts
-- Báo cáo doanh thu
-- Phân tích hiệu suất
+- Biểu đồ trực quan (Recharts)
+- Báo cáo doanh thu, phân tích hiệu suất
 - Xuất báo cáo Excel
 
-### 🔍 Audit Log & Bảo mật
-- Ghi log mọi thao tác quan trọng
-- Theo dõi lịch sử thay đổi
-- Bảo mật với Helmet.js
-- Rate limiting chống DDoS
-- Soft delete để bảo toàn dữ liệu
-
-### 🖼️ Xử lý Hình ảnh Y tế
-- Tích hợp Google Gemini AI
-- Chỉnh sửa và phân tích hình ảnh
-- Hỗ trợ chẩn đoán bằng AI
+### Audit Log & Bảo mật
+- Ghi log toàn bộ thao tác quan trọng
+- Theo dõi lịch sử thay đổi dữ liệu
+- Soft delete — bảo toàn dữ liệu, không xóa vĩnh viễn
 
 ---
 
-## 🛠️ Công nghệ Sử dụng
+## 🛠️ Công nghệ
 
 ### Frontend
-- **Framework**: React 19.2.3 + TypeScript
-- **Build Tool**: Vite 6.2.0
-- **Styling**: TailwindCSS 3.4.1
-- **Icons**: Lucide React
-- **Charts**: Recharts 3.6.0
-- **AI Integration**: Google Gemini AI
-- **Export**: XLSX (Excel)
+
+| Thành phần | Công nghệ |
+|------------|-----------|
+| Framework | React 19.2.3 + TypeScript |
+| Build Tool | Vite 6.2.0 |
+| Styling | TailwindCSS 3.4.1 |
+| Icons | Lucide React |
+| Charts | Recharts 3.6.0 |
+| Export | XLSX (Excel) |
 
 ### Backend
-- **Runtime**: Node.js 20+
-- **Framework**: Express.js 4.18.2
-- **Language**: TypeScript 5.3.3
-- **Database**: Microsoft SQL Server (MSSQL)
-- **Authentication**: JWT + bcrypt
-- **Validation**: Express Validator
-- **Security**: Helmet, CORS, Rate Limiting
-- **Logging**: Morgan + Custom Audit Logger
+
+| Thành phần | Công nghệ |
+|------------|-----------|
+| Runtime | Node.js 20+ |
+| Framework | Express.js 4.18.2 |
+| Language | TypeScript 5.3.3 |
+| Database | Microsoft SQL Server |
+| Auth | JWT + bcrypt |
+| Validation | Express Validator |
+| Security | Helmet, CORS, Rate Limiting |
+| Logging | Morgan + Custom Audit Logger |
 
 ### Database
-- **DBMS**: Microsoft SQL Server
-- **ORM**: mssql 10.0.4
-- **Features**: 
-  - Stored Procedures
-  - Triggers
-  - Soft Delete
-  - Audit Logging
+
+- **DBMS**: Microsoft SQL Server 2019+
+- **Driver**: mssql 10.0.4
+- **Tính năng**: Stored Procedures, Triggers, Soft Delete, Audit Logging
 
 ---
 
@@ -129,83 +116,73 @@
 
 ### Yêu cầu hệ thống
 
-- **Node.js**: >= 20.0.0
-- **npm**: >= 10.0.0
-- **SQL Server**: 2019 hoặc mới hơn
-- **RAM**: >= 4GB
-- **Disk**: >= 2GB trống
+| Thành phần | Phiên bản tối thiểu |
+|------------|---------------------|
+| Node.js | >= 20.0.0 |
+| npm | >= 10.0.0 |
+| SQL Server | 2019 |
+| RAM | 4 GB |
+| Disk | 2 GB trống |
 
-### Bước 1: Clone Repository
+### Bước 1: Clone repository
 
 ```bash
 git clone https://github.com/AnhVuu215/medcloud-hospital-management.git
 cd medcloud-hospital-management
 ```
 
-### Bước 2: Cài đặt Dependencies
+### Bước 2: Cài đặt dependencies
 
-#### Frontend
 ```bash
+# Frontend
 npm install
+
+# Backend
+cd backend && npm install && cd ..
 ```
 
-#### Backend
-```bash
-cd backend
-npm install
-cd ..
-```
+### Bước 3: Cấu hình database
 
-### Bước 3: Cấu hình Database
-
-1. **Tạo database trong SQL Server**:
 ```sql
+-- Tạo database
 CREATE DATABASE MedCloudDB;
 ```
 
-2. **Chạy schema**:
-```bash
-# Mở SQL Server Management Studio và chạy file:
-database/schema.sql
+Sau đó mở **SQL Server Management Studio** và chạy lần lượt:
+
+```
+database/schema.sql          -- Tạo schema
+database/seed.sql            -- Dữ liệu mẫu (tùy chọn)
+database/add-soft-delete.sql -- Tính năng soft delete (tùy chọn)
 ```
 
-3. **Thêm dữ liệu mẫu** (tùy chọn):
-```bash
-# Chạy file seed trong SSMS:
-database/seed.sql
-```
+### Bước 4: Cấu hình biến môi trường
 
-4. **Thêm soft delete** (tùy chọn):
-```bash
-# Chạy file trong SSMS:
-database/add-soft-delete.sql
-```
+**Frontend** — tạo file `.env.local` tại thư mục gốc:
 
-### Bước 4: Cấu hình Environment Variables
-
-#### Frontend (.env.local)
 ```env
-GEMINI_API_KEY=your_gemini_api_key_here
+# (Thêm các biến môi trường frontend nếu cần)
 ```
 
-#### Backend (backend/.env)
+**Backend** — tạo file `backend/.env` từ template `backend/.env.example`:
+
 ```env
-# Server Configuration
+# Server
 PORT=5000
 NODE_ENV=development
 
-# Database Configuration
+# Database
 DB_SERVER=localhost
 DB_NAME=MedCloudDB
 DB_USER=your_username
 DB_PASSWORD=your_password
 DB_PORT=1433
 
-# JWT Configuration
+# JWT
 JWT_SECRET=your_super_secret_jwt_key_here
 JWT_EXPIRES_IN=24h
 
-# CORS Configuration
+# CORS
 CORS_ORIGIN=http://localhost:5173
 
 # Rate Limiting
@@ -213,43 +190,29 @@ RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
 ```
 
-> **Lưu ý**: Copy từ `backend/.env.example` và điền thông tin của bạn
-
 ---
 
 ## 🚀 Sử dụng
 
-### Development Mode
+### Development
 
-#### Chạy Frontend và Backend riêng biệt:
-
-**Terminal 1 - Frontend**:
 ```bash
-npm run dev
-```
-Frontend sẽ chạy tại: `http://localhost:5173`
+# Chạy riêng từng service
+npm run dev              # Frontend → http://localhost:5173
+npm run dev:backend      # Backend  → http://localhost:5000
 
-**Terminal 2 - Backend**:
-```bash
-npm run dev:backend
-```
-Backend API sẽ chạy tại: `http://localhost:5000`
-
-#### Hoặc chạy đồng thời:
-```bash
+# Hoặc chạy đồng thời
 npm run dev:all
 ```
 
-### Production Build
+### Production
 
-#### Build Frontend:
 ```bash
+# Frontend
 npm run build
 npm run preview
-```
 
-#### Build Backend:
-```bash
+# Backend
 cd backend
 npm run build
 npm start
@@ -259,41 +222,45 @@ npm start
 
 ## 🔐 Tài khoản Demo
 
-Sau khi chạy `seed.sql`, bạn có thể đăng nhập với các tài khoản sau:
+> Yêu cầu đã chạy `database/seed.sql`
 
-| Vai trò | Email | Mật khẩu | Mô tả |
-|---------|-------|----------|-------|
-| **Admin** | admin@medcloud.com | admin123 | Quản trị viên hệ thống |
-| **Bác sĩ** | doctor@medcloud.com | doctor123 | Bác sĩ chuyên khoa |
-| **Y tá** | nurse@medcloud.com | nurse123 | Y tá điều dưỡng |
-| **Dược sĩ** | pharmacist@medcloud.com | pharma123 | Quản lý nhà thuốc |
-| **Kế toán** | accountant@medcloud.com | account123 | Kế toán viên |
-| **Bệnh nhân** | patient@medcloud.com | patient123 | Bệnh nhân |
+| Vai trò | Email | Mật khẩu |
+|---------|-------|----------|
+| Admin | admin@medcloud.com | admin123 |
+| Bác sĩ | doctor@medcloud.com | doctor123 |
+| Y tá | nurse@medcloud.com | nurse123 |
+| Dược sĩ | pharmacist@medcloud.com | pharma123 |
+| Kế toán | accountant@medcloud.com | account123 |
+| Bệnh nhân | patient@medcloud.com | patient123 |
 
 ---
 
 ## 📡 API Documentation
 
 ### Base URL
+
 ```
 http://localhost:5000/api
 ```
 
-### Authentication Endpoints
+### Authentication
 
-#### POST /api/auth/login
-Đăng nhập vào hệ thống
+Tất cả các endpoint có yêu cầu xác thực đều cần header:
 
-**Request Body**:
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### POST `/api/auth/login`
+
 ```json
+// Request
 {
   "email": "admin@medcloud.com",
   "password": "admin123"
 }
-```
 
-**Response**:
-```json
+// Response
 {
   "success": true,
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -306,194 +273,153 @@ http://localhost:5000/api
 }
 ```
 
-### Main API Routes
+### Endpoints
 
-| Method | Endpoint | Mô tả | Auth Required |
-|--------|----------|-------|---------------|
-| **Auth** |
+| Method | Endpoint | Mô tả | Auth |
+|--------|----------|-------|------|
 | POST | `/api/auth/login` | Đăng nhập | ❌ |
 | POST | `/api/auth/register` | Đăng ký | ❌ |
 | POST | `/api/auth/logout` | Đăng xuất | ✅ |
-| **Users** |
-| GET | `/api/users` | Lấy danh sách người dùng | ✅ Admin |
-| GET | `/api/users/:id` | Lấy thông tin người dùng | ✅ |
-| POST | `/api/users` | Tạo người dùng mới | ✅ Admin |
+| GET | `/api/users` | Danh sách người dùng | ✅ Admin |
+| POST | `/api/users` | Tạo người dùng | ✅ Admin |
 | PUT | `/api/users/:id` | Cập nhật người dùng | ✅ |
 | DELETE | `/api/users/:id` | Xóa người dùng (soft) | ✅ Admin |
-| **Appointments** |
-| GET | `/api/appointments` | Lấy danh sách lịch hẹn | ✅ |
-| GET | `/api/appointments/:id` | Lấy chi tiết lịch hẹn | ✅ |
-| POST | `/api/appointments` | Tạo lịch hẹn mới | ✅ |
+| GET | `/api/appointments` | Danh sách lịch hẹn | ✅ |
+| POST | `/api/appointments` | Tạo lịch hẹn | ✅ |
 | PUT | `/api/appointments/:id` | Cập nhật lịch hẹn | ✅ |
 | DELETE | `/api/appointments/:id` | Hủy lịch hẹn | ✅ |
-| **Medical Records** |
-| GET | `/api/medical-records` | Lấy danh sách hồ sơ | ✅ Doctor |
-| GET | `/api/medical-records/:id` | Lấy chi tiết hồ sơ | ✅ |
-| POST | `/api/medical-records` | Tạo hồ sơ mới | ✅ Doctor |
+| GET | `/api/medical-records` | Danh sách hồ sơ | ✅ Doctor |
+| POST | `/api/medical-records` | Tạo hồ sơ | ✅ Doctor |
 | PUT | `/api/medical-records/:id` | Cập nhật hồ sơ | ✅ Doctor |
-| **Pharmacy** |
-| GET | `/api/medications` | Lấy danh sách thuốc | ✅ |
-| GET | `/api/medications/:id` | Lấy thông tin thuốc | ✅ |
-| POST | `/api/medications` | Thêm thuốc mới | ✅ Pharmacist |
+| GET | `/api/medications` | Danh sách thuốc | ✅ |
+| POST | `/api/medications` | Thêm thuốc | ✅ Pharmacist |
 | PUT | `/api/medications/:id` | Cập nhật thuốc | ✅ Pharmacist |
-| **Payments** |
-| GET | `/api/payments` | Lấy danh sách thanh toán | ✅ |
-| GET | `/api/payments/:id` | Lấy chi tiết thanh toán | ✅ |
+| GET | `/api/payments` | Danh sách thanh toán | ✅ |
 | POST | `/api/payments` | Tạo thanh toán | ✅ |
-| **Audit Logs** |
-| GET | `/api/audit-logs` | Lấy audit logs | ✅ Admin |
-
-### Authentication Header
-```
-Authorization: Bearer <your_jwt_token>
-```
+| GET | `/api/audit-logs` | Audit logs | ✅ Admin |
 
 ---
 
-## 📁 Cấu trúc Thư mục
+## 📁 Cấu trúc thư mục
 
 ```
 medcloud/
-├── 📂 backend/                    # Backend API Server
-│   ├── 📂 src/
-│   │   ├── 📂 controllers/        # Request handlers
-│   │   ├── 📂 middleware/         # Express middleware
-│   │   ├── 📂 routes/             # API routes
-│   │   ├── 📂 services/           # Business logic
-│   │   ├── 📂 utils/              # Utilities
-│   │   ├── 📂 config/             # Configuration
-│   │   └── 📄 server.ts           # Entry point
-│   ├── 📄 .env.example            # Environment template
-│   ├── 📄 package.json
-│   └── 📄 tsconfig.json
+├── backend/
+│   └── src/
+│       ├── controllers/       # Request handlers
+│       ├── middleware/        # Express middleware
+│       ├── routes/            # API routes
+│       ├── services/          # Business logic
+│       ├── utils/             # Tiện ích
+│       ├── config/            # Cấu hình
+│       └── server.ts          # Entry point
 │
-├── 📂 components/                 # React components
-│   ├── 📄 Sidebar.tsx
-│   ├── 📄 Header.tsx
-│   ├── 📄 Footer.tsx
-│   └── 📄 MobileBottomNav.tsx
+├── components/                # React components dùng chung
+│   ├── Sidebar.tsx
+│   ├── Header.tsx
+│   └── Footer.tsx
 │
-├── 📂 views/                      # Page components
-│   ├── 📄 DashboardView.tsx
-│   ├── 📄 AppointmentView.tsx
-│   ├── 📄 MedicalRecordView.tsx
-│   ├── 📄 PharmacyView.tsx
-│   ├── 📄 PaymentInsuranceView.tsx
-│   ├── 📄 PatientPortalView.tsx
-│   ├── 📄 UserManagementView.tsx
-│   ├── 📄 AuditLogView.tsx
-│   ├── 📄 ImageEditView.tsx
-│   ├── 📄 AuthView.tsx
-│   └── 📄 LandingView.tsx
+├── views/                     # Page components
+│   ├── DashboardView.tsx
+│   ├── AppointmentView.tsx
+│   ├── MedicalRecordView.tsx
+│   ├── PharmacyView.tsx
+│   ├── PaymentInsuranceView.tsx
+│   ├── PatientPortalView.tsx
+│   ├── UserManagementView.tsx
+│   ├── AuditLogView.tsx
+│   └── AuthView.tsx
 │
-├── 📂 database/                   # Database scripts
-│   ├── 📄 schema.sql              # Database schema
-│   ├── 📄 seed.sql                # Sample data
-│   └── 📄 add-soft-delete.sql     # Soft delete feature
+├── database/
+│   ├── schema.sql
+│   ├── seed.sql
+│   └── add-soft-delete.sql
 │
-├── 📂 services/                   # Frontend services
-├── 📂 utils/                      # Frontend utilities
-│
-├── 📄 App.tsx                     # Main React component
-├── 📄 index.tsx                   # React entry point
-├── 📄 types.ts                    # TypeScript types
-├── 📄 constants.tsx               # Constants
-│
-├── 📄 index.css                   # Global styles
-├── 📄 landing.css                 # Landing page styles
-├── 📄 landing.html                # Landing page HTML
-├── 📄 landing.js                  # Landing page JS
-│
-├── 📄 package.json                # Frontend dependencies
-├── 📄 tsconfig.json               # TypeScript config
-├── 📄 vite.config.ts              # Vite config
-├── 📄 tailwind.config.js          # Tailwind config
-├── 📄 vercel.json                 # Vercel deployment
-│
-├── 📄 .env.local                  # Frontend environment
-├── 📄 .gitignore
-└── 📄 README.md                   # This file
+├── services/                  # Frontend services
+├── utils/                     # Frontend utilities
+├── App.tsx
+├── types.ts
+├── constants.tsx
+├── vite.config.ts
+├── tailwind.config.js
+└── README.md
 ```
 
 ---
 
 ## 🔒 Bảo mật
 
-MedCloud được xây dựng với các tiêu chuẩn bảo mật cao:
-
-- ✅ **JWT Authentication**: Xác thực an toàn với token
-- ✅ **Password Hashing**: Mã hóa mật khẩu với bcrypt
-- ✅ **Helmet.js**: Bảo vệ khỏi các lỗ hổng web phổ biến
-- ✅ **CORS**: Kiểm soát truy cập cross-origin
-- ✅ **Rate Limiting**: Chống DDoS và brute force
-- ✅ **Input Validation**: Kiểm tra và làm sạch dữ liệu đầu vào
-- ✅ **SQL Injection Prevention**: Sử dụng parameterized queries
-- ✅ **Soft Delete**: Không xóa vĩnh viễn dữ liệu quan trọng
-- ✅ **Audit Logging**: Ghi log mọi thao tác nhạy cảm
+| Biện pháp | Mô tả |
+|-----------|-------|
+| JWT Authentication | Xác thực stateless, token có thời hạn |
+| bcrypt | Mã hóa mật khẩu một chiều |
+| Helmet.js | Bảo vệ HTTP headers |
+| CORS | Kiểm soát truy cập cross-origin |
+| Rate Limiting | Giới hạn request, chống brute force |
+| Input Validation | Kiểm tra và làm sạch dữ liệu đầu vào |
+| Parameterized Queries | Ngăn chặn SQL Injection |
+| Soft Delete | Không xóa vĩnh viễn dữ liệu nhạy cảm |
+| Audit Logging | Ghi log toàn bộ thao tác quan trọng |
 
 ---
 
-## 🧪 Testing
+## 🗄️ Database Schema
 
-### Test Database Connection
+Các bảng chính trong hệ thống:
+
+| Bảng | Mô tả |
+|------|-------|
+| Users | Người dùng và phân quyền |
+| Patients | Thông tin bệnh nhân |
+| Doctors | Thông tin bác sĩ |
+| Appointments | Lịch hẹn khám |
+| MedicalRecords | Hồ sơ bệnh án |
+| Medications | Danh mục thuốc |
+| Prescriptions | Đơn thuốc |
+| Payments | Thanh toán |
+| InsuranceClaims | Bảo hiểm |
+| AuditLogs | Nhật ký hệ thống |
+
+Chi tiết xem tại [`database/schema.sql`](database/schema.sql)
+
+---
+
+## 🧪 Kiểm thử
+
 ```bash
+# Kiểm tra kết nối database
 cd backend
 npx tsx test-db-connection.ts
 ```
 
-### Manual Testing
+Kiểm thử thủ công:
 1. Khởi động frontend và backend
 2. Đăng nhập với tài khoản demo
-3. Test các chức năng chính:
-   - Tạo/sửa/xóa người dùng
-   - Đặt lịch hẹn
-   - Quản lý hồ sơ bệnh án
-   - Quản lý thuốc
-   - Thanh toán
-
----
-
-## 📊 Database Schema
-
-### Main Tables
-
-- **Users**: Quản lý người dùng và phân quyền
-- **Patients**: Thông tin bệnh nhân
-- **Doctors**: Thông tin bác sĩ
-- **Appointments**: Lịch hẹn khám
-- **MedicalRecords**: Hồ sơ bệnh án
-- **Medications**: Thuốc
-- **Prescriptions**: Đơn thuốc
-- **Payments**: Thanh toán
-- **InsuranceClaims**: Bảo hiểm
-- **AuditLogs**: Nhật ký hệ thống
-
-Xem chi tiết schema tại: [`database/schema.sql`](database/schema.sql)
+3. Thực hiện các luồng chính: tạo lịch hẹn, quản lý hồ sơ bệnh án, xuất báo cáo
 
 ---
 
 ## 🤝 Đóng góp
 
-Chúng tôi hoan nghênh mọi đóng góp! Để đóng góp:
+Mọi đóng góp đều được hoan nghênh.
 
-1. Fork repository
-2. Tạo branch mới (`git checkout -b feature/AmazingFeature`)
-3. Commit thay đổi (`git commit -m 'Add some AmazingFeature'`)
-4. Push lên branch (`git push origin feature/AmazingFeature`)
-5. Tạo Pull Request
+```bash
+git checkout -b feature/ten-tinh-nang
+git commit -m "feat: mô tả ngắn gọn"
+git push origin feature/ten-tinh-nang
+# Tạo Pull Request
+```
 
-### Coding Standards
-- Sử dụng TypeScript
-- Follow ESLint rules
-- Viết code rõ ràng, dễ đọc
+**Coding standards:**
+- Sử dụng TypeScript, tuân thủ ESLint
 - Comment cho logic phức tạp
-- Test trước khi commit
+- Kiểm thử trước khi commit
 
 ---
 
 ## 📝 License
 
-Dự án này được phân phối dưới giấy phép **MIT License**. Xem file [LICENSE](LICENSE) để biết thêm chi tiết.
+Phân phối dưới giấy phép **MIT**. Xem file [LICENSE](LICENSE) để biết thêm chi tiết.
 
 ---
 
@@ -503,34 +429,12 @@ Dự án này được phân phối dưới giấy phép **MIT License**. Xem fi
 
 - GitHub: [@AnhVuu215](https://github.com/AnhVuu215)
 - Email: support@medcloud.com
-
----
-
-## 🙏 Lời cảm ơn
-
-- [React](https://reactjs.org/) - UI Framework
-- [Express.js](https://expressjs.com/) - Backend Framework
-- [TailwindCSS](https://tailwindcss.com/) - CSS Framework
-- [Lucide](https://lucide.dev/) - Icon Library
-- [Recharts](https://recharts.org/) - Chart Library
-- [Google Gemini](https://ai.google.dev/) - AI Integration
-
----
-
-## 📞 Hỗ trợ
-
-Nếu bạn gặp vấn đề hoặc có câu hỏi:
-
-- 📧 Email: support@medcloud.com
-- 🐛 Issues: [GitHub Issues](https://github.com/AnhVuu215/medcloud-hospital-management/issues)
-- 📖 Documentation: [Wiki](https://github.com/AnhVuu215/medcloud-hospital-management/wiki)
+- Issues: [GitHub Issues](https://github.com/AnhVuu215/medcloud-hospital-management/issues)
 
 ---
 
 <div align="center">
 
-**⭐ Nếu dự án hữu ích, hãy cho chúng tôi một star! ⭐**
-
-Made with ❤️ by MedCloud Team
+Nếu dự án hữu ích với bạn, hãy để lại một ⭐
 
 </div>
